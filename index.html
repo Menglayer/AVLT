@@ -76,7 +76,7 @@
               <strong id="top-ratio">--</strong>
             </div>
           </div>
-          <button class="refresh-btn" type="button" id="refresh-button" aria-label="Refresh snapshot">
+          <button class="refresh-btn" type="button" id="refresh-button" aria-label="Refresh data">
             <span aria-hidden="true">↻</span>
             <span>Refresh</span>
           </button>
@@ -136,9 +136,9 @@
               </div>
             </div>
             <div class="formula-strip">
-              <span>已回款比例 = 回款金额 / (Supply x NAV)</span>
-              <span>回款折算价 = NAV x 已回款比例</span>
-              <span>差价 = 二级价格 - 回款折算价</span>
+              <span>回款金额 = Total Back - RWA(Inessa) + Bank</span>
+              <span>回款比例 = 回款金额 / Total Back</span>
+              <span>差价 = 二级价格 - NAV x 回款比例</span>
             </div>
           </section>
 
@@ -172,22 +172,22 @@
             <div class="panel">
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Market</p>
-                  <h2>价格参考</h2>
+                  <p class="eyebrow">Recovery Basis</p>
+                  <h2>口径拆分</h2>
                 </div>
                 <strong id="market-cap">--</strong>
               </div>
               <div class="market-stack">
                 <div>
-                  <span>Liquidity</span>
+                  <span>Total Back</span>
                   <strong id="market-liquidity">--</strong>
                 </div>
                 <div>
-                  <span>24H Change</span>
+                  <span>RWA</span>
                   <strong id="market-change-large">--</strong>
                 </div>
                 <div>
-                  <span>Reserve / Token</span>
+                  <span>Bank</span>
                   <strong id="reserve-per-token">--</strong>
                 </div>
               </div>
@@ -210,7 +210,6 @@
       </div>
     </div>
 
-    <script src="./data/snapshot.js"></script>
     <script src="./app.js" type="module"></script>
   </body>
 </html>

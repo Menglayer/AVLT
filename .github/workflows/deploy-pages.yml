@@ -6,8 +6,6 @@ on:
       - main
       - master
   workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *"
 
 permissions:
   contents: read
@@ -28,20 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Refresh market snapshot
-        run: node scripts/update-data.mjs
-
       - name: Prepare artifact
         run: |
           mkdir dist
           cp index.html styles.css app.js .nojekyll dist/
-          mkdir -p dist/data
-          cp data/snapshot.json data/snapshot.js dist/data/
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
