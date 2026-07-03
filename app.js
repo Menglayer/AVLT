@@ -4,8 +4,8 @@ const RWA_NAMES = new Set(["inessa", "rwa"]);
 const API = {
   reserves: "https://altura-liquidity-dashboard-tan.vercel.app/api/public/reserves",
   bank: "https://altura-liquidity-dashboard-tan.vercel.app/api/public/bank-transactions",
-  okx:
-    "https://web3.okx.com/zh-hans/token/hyper/0xd0ee0cf300dfb598270cd7f4d0c6e0d8f6e13f29",
+  dex:
+    "https://api.dexscreener.com/latest/dex/tokens/0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29",
 };
 
 const els = {
@@ -52,13 +52,13 @@ async function loadData() {
     const [reserves, bank, market] = await Promise.all([
       fetchJson(API.reserves),
       fetchJson(API.bank),
-      fetchOkxMarket().catch((error) => ({
-        error: error?.message || "OKX price unavailable",
+      fetchDexMarket().catch((error) => ({
+        error: error?.message || "DEX price unavailable",
       })),
     ]);
 
     render(buildModel({ reserves, bank, market }));
-    setStatus(market.error ? "error" : "ok", market.error ? "Altura 已同步，OKX 受限" : "数据已同步");
+    setStatus(market.error ? "error" : "ok", market.error ? "Altura 已同步，DEX 价格失败" : "DEX 二级价格已同步");
   } catch (error) {
     console.error(error);
     setStatus("error", "Altura 数据读取失败");
@@ -80,23 +80,37 @@ async function fetchJson(url) {
   return response.json();
 }
 
-async function fetchOkxMarket() {
-  const response = await fetch(API.okx, {
-    cache: "no-store",
-    headers: { accept: "text/html,*/*" },
-  });
+async function fetchDexMarket() {
+  const data = await fetchJson(API.dex);
+  const pair = selectDexPair(data.pairs || []);
 
-  if (!response.ok) {
-    throw new Error(`OKX HTTP ${response.status}`);
+  if (!pair) {
+    throw new Error("No AVLT DEX pair found");
   }
 
-  const html = await response.text();
   return {
-    price: matchNumber(html, /"price":"([0-9.]+)"/) || matchNumber(html, /<title>\s*AVLT\s+\$([0-9.]+)/i),
-    marketCap: matchNumber(html, /"marketCap":"([0-9.]+)"/),
-    liquidity: matchNumber(html, /"liquidity":"([0-9.]+)"/),
-    priceChange24H: matchNumber(html, /"priceChange24H":"(-?[0-9.]+)"/),
+    source: "DexScreener",
+    pairUrl: pair.url,
+    pairAddress: pair.pairAddress,
+    dexId: pair.dexId,
+    quoteSymbol: pair.quoteToken?.symbol || "",
+    price: number(pair.priceUsd),
+    marketCap: number(pair.marketCap || pair.fdv),
+    liquidity: number(pair.liquidity?.usd),
+    volume24H: number(pair.volume?.h24),
+    priceChange24H: number(pair.priceChange?.h24),
   };
+}
+
+function selectDexPair(pairs) {
+  const avlt = "0xd0ee0cf300dfb598270cd7f4d0c6e0d8f6e13f29";
+  return pairs
+    .filter((pair) => {
+      const baseAddress = String(pair.baseToken?.address || "").toLowerCase();
+      const quoteAddress = String(pair.quoteToken?.address || "").toLowerCase();
+      return pair.chainId === "hyperevm" && (baseAddress === avlt || quoteAddress === avlt);
+    })
+    .sort((a, b) => number(b.liquidity?.usd) - number(a.liquidity?.usd))[0];
 }
 
 function buildModel({ reserves, bank, market }) {
@@ -135,8 +149,6 @@ function buildModel({ reserves, bank, market }) {
 
 function render(model) {
   const change24h = number(model.market.priceChange24H);
-  const marketCap = number(model.market.marketCap);
-  const liquidity = number(model.market.liquidity);
   const flowCount = number(model.bank.count);
   const marketGapPct = model.recoveryPrice > 0 && model.marketGap !== null ? model.marketGap / model.recoveryPrice : null;
 
@@ -149,7 +161,9 @@ function render(model) {
   els.recoveredCount.textContent = `Total Back - RWA + Bank | ${flowCount} 笔 bank 流水`;
 
   els.marketPrice.textContent = model.hasMarketPrice ? formatUsd(model.marketPrice, 5) : "--";
-  els.marketChange.textContent = model.hasMarketPrice ? `24H ${formatSignedPercent(change24h / 100, 2)}` : "OKX CORS blocked";
+  els.marketChange.textContent = model.hasMarketPrice
+    ? `${String(model.market.dexId || "DEX").toUpperCase()}/${model.market.quoteSymbol || "USD"} · 24H ${formatSignedPercent(change24h / 100, 2)}`
+    : "DEX price unavailable";
   setTone(els.marketChange, change24h);
 
   els.recoveryPrice.textContent = formatUsd(model.recoveryPrice, 5);
@@ -158,7 +172,7 @@ function render(model) {
   els.marketGap.textContent = model.marketGap === null ? "--" : formatSignedUsd(model.marketGap, 5);
   els.marketGapSub.textContent =
     marketGapPct === null
-      ? "等待 OKX 二级价格"
+      ? "等待 DEX 二级价格"
       : `${model.marketGap >= 0 ? "二级高于回款折算" : "二级低于回款折算"} ${formatSignedPercent(marketGapPct, 2)}`;
   setTone(els.marketGap, model.marketGap || 0, true);
   setTone(els.marketGapSub, model.marketGap || 0, true);
@@ -245,12 +259,6 @@ function setTone(element, value, positiveIsWarning = false) {
   } else if (value < 0) {
     element.classList.add(positiveIsWarning ? "negative" : "risk");
   }
-}
-
-function matchNumber(value, pattern) {
-  const match = value.match(pattern);
-  if (!match) return 0;
-  return number(match[1]);
 }
 
 function number(value) {
