@@ -1,37 +1,48 @@
 # AVLT Recovery Dashboard
 
-一个可部署到 GitHub Pages 的 AVLT 看板。页面运行时直接读取 Altura 公开接口和 DexScreener AVLT 二级价格。
+A static AVLT recovery dashboard deployable on GitHub Pages.
 
-## 数据口径
+一个可部署到 GitHub Pages 的 AVLT 回款看板。页面运行时直接读取 Altura 公开接口、DexScreener AVLT 二级价格，以及 HyperEVM 链上余额。
+
+## Data Basis / 数据口径
 
 - NAV: `1.0945`
 - Total Back: Altura `reserves.reserves`
-- RWA: reserves 明细中的 `Inessa`
+- RWA: `Inessa` from `reserves.items`
 - Bank: Altura `bank-transactions.totalIncomingUsd`
-- 回款金额: `Total Back - RWA + Bank`
-- 回款比例: `回款金额 / Total Back`
-- 回款折算价: `NAV * 回款比例`
-- 二级相对差价: `DEX 二级价格 - 回款折算价`
-- 等待赎回中 AVLT 数量: AVLT 合约地址自身持有的 AVLT 余额，即 `balanceOf(AVLT contract)`
+- Recovered amount / 回款金额: `Total Back - RWA + Bank`
+- Recovery ratio / 回款比例: `Recovered amount / Total Back`
+- Recovery price / 回款折算价: `NAV * Recovery ratio`
+- Secondary market gap / 二级相对差价: `DEX secondary price - Recovery price`
+- Pending redemption AVLT / 等待赎回中 AVLT 数量: `balanceOf(AVLT contract)`
+
+Reserve distribution / 储备分布:
+
+- Shows latest `reserves.items`
+- Adds `Bank` as a separate row from `bank-transactions.totalIncomingUsd`
+- Table total is `Total Back + Bank`
 
 Altura API:
 
 - `https://altura-liquidity-dashboard-tan.vercel.app/api/public/reserves`
 - `https://altura-liquidity-dashboard-tan.vercel.app/api/public/bank-transactions`
 
-DEX 价格 API:
+DEX price API:
 
 - `https://api.dexscreener.com/latest/dex/tokens/0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29`
 
-链上读取:
+On-chain read / 链上读取:
 
 - HyperEVM RPC: `https://rpc.hyperliquid.xyz/evm`
 - AVLT / pending contract: `0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29`
 
-页面包含风险提示：只做信息展示，不是财务建议。
+Risk notice / 风险提示:
+
+- For information only. Not financial advice.
+- 只做信息展示，不是财务建议。
 
 ## GitHub Pages
 
-1. 推送到 GitHub 仓库。
-2. 在仓库 `Settings -> Pages` 中选择 `GitHub Actions`。
-3. workflow 会把静态文件部署到 GitHub Pages。
+1. Push to the GitHub repository.
+2. In `Settings -> Pages`, select `GitHub Actions`.
+3. The workflow deploys the static files to GitHub Pages.

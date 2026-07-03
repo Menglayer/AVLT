@@ -98,6 +98,7 @@ const i18n = {
       aboveRecovery: "二级高于回款折算",
       belowRecovery: "二级低于回款折算",
       recoveryBasis: "回款口径",
+      bankItem: "Bank 回款",
     },
   },
   en: {
@@ -186,6 +187,7 @@ const i18n = {
       aboveRecovery: "Secondary price above recovery value",
       belowRecovery: "Secondary price below recovery value",
       recoveryBasis: "Recovery basis",
+      bankItem: "Bank recovered",
     },
   },
 };
@@ -352,6 +354,8 @@ function buildModel({ reserves, bank, market, pendingRedemption }) {
   const rwaItem = findRwaItem(reserves.items || []);
   const rwaUsd = number(rwaItem?.amount);
   const recoveredUsd = Math.max(totalBackUsd - rwaUsd + bankUsd, 0);
+  const reserveDistribution = buildReserveDistribution(reserves.items || [], bankUsd);
+  const reserveDistributionTotal = totalBackUsd + bankUsd;
   const recoveredRatio = totalBackUsd > 0 ? recoveredUsd / totalBackUsd : 0;
   const recoveryPrice = NAV * recoveredRatio;
   const marketPrice = number(market.price);
@@ -365,6 +369,8 @@ function buildModel({ reserves, bank, market, pendingRedemption }) {
     market,
     pendingRedemption,
     totalBackUsd,
+    reserveDistribution,
+    reserveDistributionTotal,
     supply,
     bankUsd,
     rwaName: rwaItem?.name || "Inessa",
@@ -420,15 +426,29 @@ function render(model) {
   els.navDiscount.textContent = model.navDiscountPct === null ? "--" : formatSignedPercent(model.navDiscountPct, 2);
   setTone(els.navDiscount, model.navDiscountPct || 0);
 
-  els.reserveTotal.textContent = formatUsd(model.totalBackUsd, 0);
+  els.reserveTotal.textContent = formatUsd(model.reserveDistributionTotal, 0);
   els.marketCap.textContent = t("state.recoveryBasis");
   els.marketLiquidity.textContent = formatUsd(model.totalBackUsd, 0);
   els.marketChangeLarge.textContent = `${formatUsd(model.rwaUsd, 0)} ${model.rwaName}`;
   els.reservePerToken.textContent = formatUsd(model.bankUsd, 0);
   els.flowTotal.textContent = formatUsd(model.bankUsd, 0);
 
-  renderReserves(model.reserves.items || [], model.totalBackUsd, model.rwaName);
+  renderReserves(model.reserveDistribution, model.reserveDistributionTotal, model.rwaName);
   renderFlows(model.bank.items || []);
+}
+
+function buildReserveDistribution(items, bankUsd) {
+  const rows = items.map((item) => ({ ...item, kind: "reserve" }));
+  if (bankUsd > 0) {
+    rows.push({
+      id: "bank-recovered",
+      name: "Bank",
+      currency: "USD",
+      amount: bankUsd,
+      kind: "bank",
+    });
+  }
+  return rows;
 }
 
 function renderReserves(items, total, rwaName) {
@@ -444,9 +464,11 @@ function renderReserves(items, total, rwaName) {
       const amount = number(item.amount);
       const ratio = total > 0 ? amount / total : 0;
       const isRwa = item.name === rwaName || RWA_NAMES.has(String(item.name || "").toLowerCase());
+      const isBank = item.kind === "bank";
+      const label = isBank ? t("state.bankItem") : `${item.name || item.currency || "Unknown"}${isRwa ? " (RWA)" : ""}`;
       return `
         <tr>
-          <td>${escapeHtml(item.name || item.currency || "Unknown")}${isRwa ? " (RWA)" : ""}</td>
+          <td>${escapeHtml(label)}</td>
           <td>${formatUsd(amount, 0)}</td>
           <td>${formatPercent(ratio, 2)}</td>
         </tr>
