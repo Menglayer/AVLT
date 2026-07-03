@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AVLT Recovery Dashboard</title>
+    <meta
+      name="description"
+      content="AVLT 已回款金额、二级价格、NAV 折算价值与价差看板。"
+    />
+    <link rel="preconnect" href="https://app.altura.trade" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" aria-label="Dashboard navigation">
+        <a class="brand" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
+          <img src="https://app.altura.trade/fulllogo.svg" alt="Altura" />
+        </a>
+
+        <nav class="nav-group" aria-label="Overview">
+          <p class="nav-title">Overview</p>
+          <a class="nav-item active" href="#dashboard">
+            <span class="nav-dot"></span>
+            <span>AVLT Board</span>
+          </a>
+          <a class="nav-item" href="#proof">
+            <span class="nav-dot"></span>
+            <span>Proof</span>
+          </a>
+          <a class="nav-item" href="#flows">
+            <span class="nav-dot"></span>
+            <span>Flows</span>
+          </a>
+        </nav>
+
+        <nav class="nav-group" aria-label="Sources">
+          <p class="nav-title">Sources</p>
+          <a class="nav-item" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
+            <span class="nav-dot"></span>
+            <span>Altura POR</span>
+          </a>
+          <a class="nav-item" href="https://web3.okx.com/zh-hans/token/hyper/0xd0ee0cf300dfb598270cd7f4d0c6e0d8f6e13f29" target="_blank" rel="noreferrer">
+            <span class="nav-dot"></span>
+            <span>OKX AVLT</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <span class="status-light"></span>
+          <span id="source-status">等待数据</span>
+        </div>
+      </aside>
+
+      <div class="page">
+        <div class="notice">
+          <span>AVLT NAV 固定参数</span>
+          <strong id="nav-inline">$1.0945</strong>
+        </div>
+
+        <header class="topbar">
+          <a class="mobile-brand" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
+            <img src="https://app.altura.trade/fulllogo.svg" alt="Altura" />
+          </a>
+          <div class="top-stats" aria-label="Quick stats">
+            <div>
+              <span>Supply</span>
+              <strong id="top-supply">--</strong>
+            </div>
+            <div>
+              <span>Market</span>
+              <strong id="top-price">--</strong>
+            </div>
+            <div>
+              <span>Recovered</span>
+              <strong id="top-ratio">--</strong>
+            </div>
+          </div>
+          <button class="refresh-btn" type="button" id="refresh-button" aria-label="Refresh snapshot">
+            <span aria-hidden="true">↻</span>
+            <span>Refresh</span>
+          </button>
+        </header>
+
+        <main class="content" id="dashboard">
+          <section class="hero-band">
+            <div>
+              <p class="eyebrow">AVLT Recovery Monitor</p>
+              <h1>回款折算价差看板</h1>
+            </div>
+            <div class="timestamp">
+              <span>Last update</span>
+              <strong id="updated-at">--</strong>
+            </div>
+          </section>
+
+          <section class="metric-grid" aria-label="Core metrics">
+            <article class="metric-card primary">
+              <p>已回款金额</p>
+              <strong id="recovered-usd">--</strong>
+              <span id="recovered-count">--</span>
+            </article>
+            <article class="metric-card">
+              <p>AVLT 二级价格</p>
+              <strong id="market-price">--</strong>
+              <span id="market-change">--</span>
+            </article>
+            <article class="metric-card">
+              <p>回款折算价</p>
+              <strong id="recovery-price">--</strong>
+              <span id="recovery-ratio">--</span>
+            </article>
+            <article class="metric-card accent">
+              <p>二级相对差价</p>
+              <strong id="market-gap">--</strong>
+              <span id="market-gap-sub">--</span>
+            </article>
+          </section>
+
+          <section class="calculation-band" aria-label="Calculation detail">
+            <div class="calc-main">
+              <div class="calc-header">
+                <p>回款进度</p>
+                <strong id="progress-value">--</strong>
+              </div>
+              <div class="progress-track" aria-hidden="true">
+                <span id="progress-fill"></span>
+              </div>
+              <div class="calc-row">
+                <span>总 NAV 口径</span>
+                <strong id="total-nav">--</strong>
+              </div>
+              <div class="calc-row">
+                <span>距 NAV 折价</span>
+                <strong id="nav-discount">--</strong>
+              </div>
+            </div>
+            <div class="formula-strip">
+              <span>已回款比例 = 回款金额 / (Supply x NAV)</span>
+              <span>回款折算价 = NAV x 已回款比例</span>
+              <span>差价 = 二级价格 - 回款折算价</span>
+            </div>
+          </section>
+
+          <section class="split-section" id="proof">
+            <div class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Proof of Reserves</p>
+                  <h2>储备分布</h2>
+                </div>
+                <strong id="reserve-total">--</strong>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>来源</th>
+                      <th>金额</th>
+                      <th>占比</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reserve-table">
+                    <tr>
+                      <td colspan="3">Loading...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Market</p>
+                  <h2>价格参考</h2>
+                </div>
+                <strong id="market-cap">--</strong>
+              </div>
+              <div class="market-stack">
+                <div>
+                  <span>Liquidity</span>
+                  <strong id="market-liquidity">--</strong>
+                </div>
+                <div>
+                  <span>24H Change</span>
+                  <strong id="market-change-large">--</strong>
+                </div>
+                <div>
+                  <span>Reserve / Token</span>
+                  <strong id="reserve-per-token">--</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel flow-panel" id="flows">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Bank Transactions</p>
+                <h2>回款流水</h2>
+              </div>
+              <strong id="flow-total">--</strong>
+            </div>
+            <div class="flow-list" id="flow-list" aria-live="polite">
+              <div class="flow-item loading-row">Loading...</div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="./data/snapshot.js"></script>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
