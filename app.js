@@ -1,21 +1,25 @@
 const NAV = 1.0945;
 const RWA_NAMES = new Set(["inessa", "rwa"]);
+const AVLT_ADDRESS = "0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29";
+const AVLT_DECIMALS = 6;
 
 const API = {
   reserves: "https://altura-liquidity-dashboard-tan.vercel.app/api/public/reserves",
   bank: "https://altura-liquidity-dashboard-tan.vercel.app/api/public/bank-transactions",
   dex:
     "https://api.dexscreener.com/latest/dex/tokens/0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29",
+  rpc: "https://rpc.hyperliquid.xyz/evm",
 };
 
 const els = {
   status: document.querySelector("#source-status"),
   light: document.querySelector(".status-light"),
   refresh: document.querySelector("#refresh-button"),
-  navInline: document.querySelector("#nav-inline"),
   topSupply: document.querySelector("#top-supply"),
   topPrice: document.querySelector("#top-price"),
   topRatio: document.querySelector("#top-ratio"),
+  topNav: document.querySelector("#top-nav"),
+  topPending: document.querySelector("#top-pending"),
   updatedAt: document.querySelector("#updated-at"),
   recoveredUsd: document.querySelector("#recovered-usd"),
   recoveredCount: document.querySelector("#recovered-count"),
@@ -39,7 +43,7 @@ const els = {
   flowList: document.querySelector("#flow-list"),
 };
 
-els.navInline.textContent = formatUsd(NAV, 4);
+els.topNav.textContent = formatUsd(NAV, 4);
 els.refresh.addEventListener("click", loadData);
 
 loadData();
@@ -49,15 +53,18 @@ async function loadData() {
   els.refresh.disabled = true;
 
   try {
-    const [reserves, bank, market] = await Promise.all([
+    const [reserves, bank, market, pendingRedemption] = await Promise.all([
       fetchJson(API.reserves),
       fetchJson(API.bank),
       fetchDexMarket().catch((error) => ({
         error: error?.message || "DEX price unavailable",
       })),
+      fetchPendingRedemptionAvlt().catch((error) => ({
+        error: error?.message || "Pending AVLT unavailable",
+      })),
     ]);
 
-    render(buildModel({ reserves, bank, market }));
+    render(buildModel({ reserves, bank, market, pendingRedemption }));
     setStatus(market.error ? "error" : "ok", market.error ? "Altura 已同步，DEX 价格失败" : "DEX 二级价格已同步");
   } catch (error) {
     console.error(error);
@@ -102,6 +109,41 @@ async function fetchDexMarket() {
   };
 }
 
+async function fetchPendingRedemptionAvlt() {
+  const balanceCall = `0x70a08231000000000000000000000000${AVLT_ADDRESS.slice(2).toLowerCase()}`;
+  const response = await fetch(API.rpc, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_call",
+      params: [
+        {
+          to: AVLT_ADDRESS,
+          data: balanceCall,
+        },
+        "latest",
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HyperEVM RPC HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (data.error || !data.result) {
+    throw new Error(data.error?.message || "HyperEVM RPC result missing");
+  }
+
+  return {
+    raw: data.result,
+    amount: formatUnits(data.result, AVLT_DECIMALS),
+  };
+}
+
 function selectDexPair(pairs) {
   const avlt = "0xd0ee0cf300dfb598270cd7f4d0c6e0d8f6e13f29";
   return pairs
@@ -113,7 +155,7 @@ function selectDexPair(pairs) {
     .sort((a, b) => number(b.liquidity?.usd) - number(a.liquidity?.usd))[0];
 }
 
-function buildModel({ reserves, bank, market }) {
+function buildModel({ reserves, bank, market, pendingRedemption }) {
   const totalBackUsd = number(reserves.reserves);
   const supply = number(reserves.supply);
   const bankUsd = number(bank.totalIncomingUsd);
@@ -131,6 +173,7 @@ function buildModel({ reserves, bank, market }) {
     reserves,
     bank,
     market,
+    pendingRedemption,
     totalBackUsd,
     supply,
     bankUsd,
@@ -155,6 +198,10 @@ function render(model) {
   els.topSupply.textContent = formatCompact(model.supply);
   els.topPrice.textContent = model.hasMarketPrice ? formatUsd(model.marketPrice, 4) : "--";
   els.topRatio.textContent = formatPercent(model.recoveredRatio, 2);
+  els.topNav.textContent = formatUsd(NAV, 4);
+  els.topPending.textContent = model.pendingRedemption?.error
+    ? "--"
+    : `${formatNumber(number(model.pendingRedemption?.amount), 2)} AVLT`;
   els.updatedAt.textContent = formatDate(model.updatedAt);
 
   els.recoveredUsd.textContent = formatUsd(model.recoveredUsd, 0);
@@ -264,6 +311,15 @@ function setTone(element, value, positiveIsWarning = false) {
 function number(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatUnits(hexValue, decimals) {
+  const value = BigInt(hexValue);
+  const base = 10n ** BigInt(decimals);
+  const whole = value / base;
+  const fraction = value % base;
+  const fractionText = fraction.toString().padStart(decimals, "0").replace(/0+$/, "");
+  return Number(`${whole.toString()}${fractionText ? `.${fractionText}` : ""}`);
 }
 
 function formatUsd(value, digits = 2) {

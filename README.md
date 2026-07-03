@@ -12,6 +12,7 @@
 - 回款比例: `回款金额 / Total Back`
 - 回款折算价: `NAV * 回款比例`
 - 二级相对差价: `DEX 二级价格 - 回款折算价`
+- 等待赎回中 AVLT 数量: AVLT 合约地址自身持有的 AVLT 余额，即 `balanceOf(AVLT contract)`
 
 Altura API:
 
@@ -21,6 +22,13 @@ Altura API:
 DEX 价格 API:
 
 - `https://api.dexscreener.com/latest/dex/tokens/0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29`
+
+链上读取:
+
+- HyperEVM RPC: `https://rpc.hyperliquid.xyz/evm`
+- AVLT / pending contract: `0xd0Ee0CF300DFB598270cd7F4D0c6E0D8F6e13f29`
+
+页面包含风险提示：只做信息展示，不是财务建议。
 
 ## GitHub Pages
 

@@ -190,6 +190,13 @@ button {
   color: var(--yellow);
 }
 
+.made-by {
+  color: var(--green);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .topbar {
   display: flex;
   min-height: 72px;
