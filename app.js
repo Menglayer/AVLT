@@ -63,8 +63,8 @@ const i18n = {
       dexToNav: "距 NAV 折价",
     },
     formula: {
-      recovered: "回款金额 = Total Back - RWA(Inessa) + Bank",
-      ratio: "回款比例 = 回款金额 / Total Back",
+      recovered: "调整后 RWA = Inessa - Bank",
+      ratio: "回款金额 = Total Back - 调整后 RWA",
       gap: "差价 = 二级价格 - NAV x 回款比例",
     },
     proof: {
@@ -152,8 +152,8 @@ const i18n = {
       dexToNav: "DEX to NAV discount",
     },
     formula: {
-      recovered: "Recovered amount = Total Back - RWA(Inessa) + Bank",
-      ratio: "Recovery ratio = Recovered amount / Total Back",
+      recovered: "Adjusted RWA = Inessa - Bank",
+      ratio: "Recovered amount = Total Back - Adjusted RWA",
       gap: "Gap = Secondary price - NAV x Recovery ratio",
     },
     proof: {
@@ -352,10 +352,11 @@ function buildModel({ reserves, bank, market, pendingRedemption }) {
   const supply = number(reserves.supply);
   const bankUsd = number(bank.totalIncomingUsd);
   const rwaItem = findRwaItem(reserves.items || []);
-  const rwaUsd = number(rwaItem?.amount);
-  const recoveredUsd = Math.max(totalBackUsd - rwaUsd + bankUsd, 0);
-  const reserveDistribution = buildReserveDistribution(reserves.items || [], bankUsd);
-  const reserveDistributionTotal = totalBackUsd + bankUsd;
+  const rawRwaUsd = number(rwaItem?.amount);
+  const rwaUsd = Math.max(rawRwaUsd - bankUsd, 0);
+  const recoveredUsd = Math.max(totalBackUsd - rwaUsd, 0);
+  const reserveDistribution = buildReserveDistribution(reserves.items || [], bankUsd, rwaItem);
+  const reserveDistributionTotal = totalBackUsd;
   const recoveredRatio = totalBackUsd > 0 ? recoveredUsd / totalBackUsd : 0;
   const recoveryPrice = NAV * recoveredRatio;
   const marketPrice = number(market.price);
@@ -373,6 +374,7 @@ function buildModel({ reserves, bank, market, pendingRedemption }) {
     reserveDistributionTotal,
     supply,
     bankUsd,
+    rawRwaUsd,
     rwaName: rwaItem?.name || "Inessa",
     rwaUsd,
     recoveredUsd,
@@ -437,8 +439,21 @@ function render(model) {
   renderFlows(model.bank.items || []);
 }
 
-function buildReserveDistribution(items, bankUsd) {
-  const rows = items.map((item) => ({ ...item, kind: "reserve" }));
+function buildReserveDistribution(items, bankUsd, rwaItem) {
+  const rwaId = rwaItem?.id;
+  const rwaName = String(rwaItem?.name || "").toLowerCase();
+  const rows = items.map((item) => {
+    const isRwa =
+      (rwaId && item.id === rwaId) ||
+      (rwaName && String(item.name || "").toLowerCase() === rwaName) ||
+      RWA_NAMES.has(String(item.name || "").toLowerCase());
+
+    return {
+      ...item,
+      amount: isRwa ? Math.max(number(item.amount) - bankUsd, 0) : item.amount,
+      kind: "reserve",
+    };
+  });
   if (bankUsd > 0) {
     rows.push({
       id: "bank-recovered",

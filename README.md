@@ -8,9 +8,10 @@ A static AVLT recovery dashboard deployable on GitHub Pages.
 
 - NAV: `1.0945`
 - Total Back: Altura `reserves.reserves`
-- RWA: `Inessa` from `reserves.items`
 - Bank: Altura `bank-transactions.totalIncomingUsd`
-- Recovered amount / 回款金额: `Total Back - RWA + Bank`
+- Raw RWA / 原始 RWA: `Inessa` from `reserves.items`
+- Adjusted RWA / 调整后 RWA: `Raw RWA - Bank`
+- Recovered amount / 回款金额: `Total Back - Adjusted RWA`
 - Recovery ratio / 回款比例: `Recovered amount / Total Back`
 - Recovery price / 回款折算价: `NAV * Recovery ratio`
 - Secondary market gap / 二级相对差价: `DEX secondary price - Recovery price`
@@ -20,7 +21,8 @@ Reserve distribution / 储备分布:
 
 - Shows latest `reserves.items`
 - Adds `Bank` as a separate row from `bank-transactions.totalIncomingUsd`
-- Table total is `Total Back + Bank`
+- Shows `Inessa (RWA)` as `Raw Inessa - Bank`
+- Table total remains `Total Back`
 
 Altura API:
 
