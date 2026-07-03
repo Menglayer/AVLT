@@ -119,6 +119,23 @@ button {
     border-color 160ms ease;
 }
 
+.nav-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.nav-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
 .nav-item:hover,
 .nav-item.active {
   color: var(--text);
@@ -205,6 +222,42 @@ button {
   gap: 18px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--border);
+}
+
+.top-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.lang-btn {
+  min-width: 52px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 0;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.lang-btn.active {
+  color: #00110b;
+  background: var(--green);
+  font-weight: 850;
+}
+
+.lang-btn:not(.active):hover {
+  color: var(--text);
 }
 
 .mobile-brand {
@@ -620,6 +673,11 @@ th:nth-child(3) {
     align-items: flex-start;
   }
 
+  .top-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .top-stats {
     flex: 1;
   }
@@ -656,6 +714,15 @@ th:nth-child(3) {
 
   .refresh-btn {
     width: 100%;
+  }
+
+  .top-actions,
+  .lang-switch {
+    width: 100%;
+  }
+
+  .lang-btn {
+    flex: 1;
   }
 
   .content {

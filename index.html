@@ -6,59 +6,77 @@
     <title>AVLT Recovery Dashboard</title>
     <meta
       name="description"
-      content="AVLT 已回款金额、二级价格、NAV 折算价值与价差看板。"
+      content="AVLT recovered amount, DEX price, NAV recovery value and price gap dashboard."
     />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="%23030504"/><path d="M14 46 28 16h8l14 30h-8l-3-7H25l-3 7h-8Zm14-14h8l-4-10-4 10Z" fill="%235dffca"/><path d="M12 52h40" stroke="%23ffd24a" stroke-width="4" stroke-linecap="square"/></svg>'
+    />
+    <link rel="apple-touch-icon" href="https://app.altura.trade/fulllogo.svg" />
     <link rel="preconnect" href="https://app.altura.trade" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="shell">
-      <aside class="sidebar" aria-label="Dashboard navigation">
+      <aside class="sidebar" aria-label="Dashboard navigation" data-i18n-aria="nav.main">
         <a class="brand" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
           <img src="https://app.altura.trade/fulllogo.svg" alt="Altura" />
         </a>
 
-        <nav class="nav-group" aria-label="Overview">
-          <p class="nav-title">Overview</p>
+        <nav class="nav-group" aria-label="Overview" data-i18n-aria="nav.overview">
+          <p class="nav-title" data-i18n="nav.overview">Overview</p>
           <a class="nav-item active" href="#dashboard">
-            <span class="nav-dot"></span>
-            <span>AVLT Board</span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z" /></svg>
+            </span>
+            <span data-i18n="nav.board">AVLT Board</span>
           </a>
           <a class="nav-item" href="#proof">
-            <span class="nav-dot"></span>
-            <span>Proof</span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Zm0 3.1 5 1.9v4c0 3.3-1.9 5.7-5 6.5-3.1-.8-5-3.2-5-6.5V8l5-1.9Z" /></svg>
+            </span>
+            <span data-i18n="nav.proof">Proof</span>
           </a>
           <a class="nav-item" href="#flows">
-            <span class="nav-dot"></span>
-            <span>Flows</span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 7h10.2l-2.6-2.6L14 3l5 5-5 5-1.4-1.4L15.2 9H5V7Zm14 10H8.8l2.6 2.6L10 21l-5-5 5-5 1.4 1.4L8.8 15H19v2Z" /></svg>
+            </span>
+            <span data-i18n="nav.flows">Flows</span>
           </a>
         </nav>
 
-        <nav class="nav-group" aria-label="Sources">
-          <p class="nav-title">Sources</p>
+        <nav class="nav-group" aria-label="Sources" data-i18n-aria="nav.sources">
+          <p class="nav-title" data-i18n="nav.sources">Sources</p>
           <a class="nav-item" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
-            <span class="nav-dot"></span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16v4H4V5Zm0 6h16v8H4v-8Zm3 2v4h10v-4H7Z" /></svg>
+            </span>
             <span>Altura POR</span>
           </a>
           <a class="nav-item" href="https://dexscreener.com/search?q=avlt" target="_blank" rel="noreferrer">
-            <span class="nav-dot"></span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 18h3V8H4v10Zm5 0h3V4H9v14Zm5 0h3v-7h-3v7Zm5 0h3V6h-3v12Z" /></svg>
+            </span>
             <span>DEX AVLT</span>
           </a>
           <a class="nav-item" href="https://hyperevmscan.io/address/0xd0ee0cf300dfb598270cd7f4d0c6e0d8f6e13f29#tokentxns" target="_blank" rel="noreferrer">
-            <span class="nav-dot"></span>
-            <span>Pending</span>
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v3H3v10h18V12h-2V9a7 7 0 0 0-7-7Zm-4 10V9a4 4 0 1 1 8 0v3H8Z" /></svg>
+            </span>
+            <span data-i18n="nav.pending">Pending</span>
           </a>
         </nav>
 
         <div class="sidebar-foot">
           <span class="status-light"></span>
-          <span id="source-status">等待数据</span>
+          <span id="source-status" data-i18n="state.waiting">Waiting for data</span>
         </div>
       </aside>
 
       <div class="page">
         <div class="notice">
-          <span>只做信息展示，不是财务建议</span>
+          <span data-i18n="notice.risk">只做信息展示，不是财务建议</span>
           <a class="made-by" href="https://x.com/MengLayer" target="_blank" rel="noreferrer">made by MengLayer</a>
         </div>
 
@@ -66,17 +84,17 @@
           <a class="mobile-brand" href="https://app.altura.trade/proof-of-reserves" target="_blank" rel="noreferrer">
             <img src="https://app.altura.trade/fulllogo.svg" alt="Altura" />
           </a>
-          <div class="top-stats" aria-label="Quick stats">
+          <div class="top-stats" aria-label="Quick stats" data-i18n-aria="top.quickStats">
             <div>
-              <span>Supply</span>
+              <span data-i18n="top.supply">Supply</span>
               <strong id="top-supply">--</strong>
             </div>
             <div>
-              <span>DEX Price</span>
+              <span data-i18n="top.dexPrice">DEX Price</span>
               <strong id="top-price">--</strong>
             </div>
             <div>
-              <span>Recovered</span>
+              <span data-i18n="top.recovered">Recovered</span>
               <strong id="top-ratio">--</strong>
             </div>
             <div>
@@ -84,73 +102,79 @@
               <strong id="top-nav">$1.0945</strong>
             </div>
             <div>
-              <span>等待赎回中 AVLT</span>
+              <span data-i18n="top.pending">等待赎回中 AVLT</span>
               <strong id="top-pending">--</strong>
             </div>
           </div>
-          <button class="refresh-btn" type="button" id="refresh-button" aria-label="Refresh data">
-            <span aria-hidden="true">↻</span>
-            <span>Refresh</span>
-          </button>
+          <div class="top-actions">
+            <div class="lang-switch" aria-label="Language switch" data-i18n-aria="lang.switch">
+              <button class="lang-btn active" type="button" data-lang="zh">中文</button>
+              <button class="lang-btn" type="button" data-lang="en">EN</button>
+            </div>
+            <button class="refresh-btn" type="button" id="refresh-button" aria-label="Refresh data" data-i18n-aria="action.refresh">
+              <span aria-hidden="true">↻</span>
+              <span data-i18n="action.refresh">Refresh</span>
+            </button>
+          </div>
         </header>
 
         <main class="content" id="dashboard">
           <section class="hero-band">
             <div>
               <p class="eyebrow">AVLT Recovery Monitor</p>
-              <h1>回款折算价差看板</h1>
+              <h1 data-i18n="hero.title">回款折算价差看板</h1>
             </div>
             <div class="timestamp">
-              <span>Last update</span>
+              <span data-i18n="hero.lastUpdate">Last update</span>
               <strong id="updated-at">--</strong>
             </div>
           </section>
 
-          <section class="metric-grid" aria-label="Core metrics">
+          <section class="metric-grid" aria-label="Core metrics" data-i18n-aria="metrics.core">
             <article class="metric-card primary">
-              <p>已回款金额</p>
+              <p data-i18n="metric.recoveredUsd">已回款金额</p>
               <strong id="recovered-usd">--</strong>
               <span id="recovered-count">--</span>
             </article>
             <article class="metric-card">
-              <p>AVLT DEX 二级价</p>
+              <p data-i18n="metric.dexPrice">AVLT DEX 二级价</p>
               <strong id="market-price">--</strong>
               <span id="market-change">--</span>
             </article>
             <article class="metric-card">
-              <p>回款折算价</p>
+              <p data-i18n="metric.recoveryPrice">回款折算价</p>
               <strong id="recovery-price">--</strong>
               <span id="recovery-ratio">--</span>
             </article>
             <article class="metric-card accent">
-              <p>二级相对差价</p>
+              <p data-i18n="metric.gap">二级相对差价</p>
               <strong id="market-gap">--</strong>
               <span id="market-gap-sub">--</span>
             </article>
           </section>
 
-          <section class="calculation-band" aria-label="Calculation detail">
+          <section class="calculation-band" aria-label="Calculation detail" data-i18n-aria="calc.detail">
             <div class="calc-main">
               <div class="calc-header">
-                <p>回款进度</p>
+                <p data-i18n="calc.progress">回款进度</p>
                 <strong id="progress-value">--</strong>
               </div>
               <div class="progress-track" aria-hidden="true">
                 <span id="progress-fill"></span>
               </div>
               <div class="calc-row">
-                <span>总 NAV 口径</span>
+                <span data-i18n="calc.totalBack">总 NAV 口径</span>
                 <strong id="total-nav">--</strong>
               </div>
               <div class="calc-row">
-                <span>距 NAV 折价</span>
+                <span data-i18n="calc.dexToNav">距 NAV 折价</span>
                 <strong id="nav-discount">--</strong>
               </div>
             </div>
             <div class="formula-strip">
-              <span>回款金额 = Total Back - RWA(Inessa) + Bank</span>
-              <span>回款比例 = 回款金额 / Total Back</span>
-              <span>差价 = 二级价格 - NAV x 回款比例</span>
+              <span data-i18n="formula.recovered">回款金额 = Total Back - RWA(Inessa) + Bank</span>
+              <span data-i18n="formula.ratio">回款比例 = 回款金额 / Total Back</span>
+              <span data-i18n="formula.gap">差价 = 二级价格 - NAV x 回款比例</span>
             </div>
           </section>
 
@@ -159,7 +183,7 @@
               <div class="panel-heading">
                 <div>
                   <p class="eyebrow">Proof of Reserves</p>
-                  <h2>储备分布</h2>
+                  <h2 data-i18n="proof.title">储备分布</h2>
                 </div>
                 <strong id="reserve-total">--</strong>
               </div>
@@ -167,14 +191,14 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>来源</th>
-                      <th>金额</th>
-                      <th>占比</th>
+                      <th data-i18n="table.source">来源</th>
+                      <th data-i18n="table.amount">金额</th>
+                      <th data-i18n="table.ratio">占比</th>
                     </tr>
                   </thead>
                   <tbody id="reserve-table">
                     <tr>
-                      <td colspan="3">Loading...</td>
+                      <td colspan="3" data-i18n="state.loading">Loading...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -185,7 +209,7 @@
               <div class="panel-heading">
                 <div>
                   <p class="eyebrow">Recovery Basis</p>
-                  <h2>口径拆分</h2>
+                  <h2 data-i18n="basis.title">口径拆分</h2>
                 </div>
                 <strong id="market-cap">--</strong>
               </div>
@@ -210,12 +234,12 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Bank Transactions</p>
-                <h2>回款流水</h2>
+                <h2 data-i18n="flows.title">回款流水</h2>
               </div>
               <strong id="flow-total">--</strong>
             </div>
             <div class="flow-list" id="flow-list" aria-live="polite">
-              <div class="flow-item loading-row">Loading...</div>
+              <div class="flow-item loading-row" data-i18n="state.loading">Loading...</div>
             </div>
           </section>
         </main>
